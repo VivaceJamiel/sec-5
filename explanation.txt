@@ -4,4 +4,7 @@ I then wrote code to set up a server but ran into some troubles
 I tries using ssh-keygen to generate a key but it didn't work
 I then used paramiko's function to generate an RSA key and had it save to a file in the directory, and it worked
 I then used the key to create a server but then ran into trouble trying to make an ssh terminal
-Trying to figure out how to get the server to respond to commands was a challenge but following the documents I was able to get the commands the user is sending to the server
+Trying to figure out how to get the server to respond to commands was a challenge but following the documents I was able to get the commands that the user is sending to the server
+The next task was to make file system for the server to use.
+I used pathlib to create a directory for the server to use and then created a file system for the server to use
+The directory the server uses is the 'dir' directory and it is made at the start if it doesn't exist and the server moves to it at the beginning

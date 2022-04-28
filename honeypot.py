@@ -17,6 +17,7 @@ running = True
 in_dir = False
 
 def ssh_command_handler(command, channel):
+    # Checks if we are in ssh directory, if not, checks if it exists, if it doesn't, creates it and changes to it
     global in_dir
     print(Path.cwd())
     if not in_dir:  
@@ -27,10 +28,15 @@ def ssh_command_handler(command, channel):
                 path.mkdir()
             chdir(path)
             in_dir = True
-        
+    
+    # Commands
     if "ls" in command:
-        print("ls")
+        path = Path(Path.cwd())
+        contents = [x for x in path.iterdir() if x.is_dir() or x.is_file()]
+        print(contents)
     elif "echo" in command:
+        parts = command.split(" ")
+        print(parts)
         print("echo")
     elif"cat" in command:
         print("cat")
@@ -108,8 +114,12 @@ def init():
                     command = ""
                     while not command.endswith("\r"):
                         transport = chan.recv(1024)
-                        chan.send(transport)
                         command += transport.decode("utf-8")
+                        print(transport)
+                        if transport == b'\x7f':
+                            command = command[:-2]
+                            print(command)
+                        chan.send(command)
                     chan.send("\r\n")
                     command = command.rstrip()
                     print(command)
