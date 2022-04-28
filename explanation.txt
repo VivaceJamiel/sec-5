@@ -1,0 +1,7 @@
+To start, I had to figure out how to make an SSH server using paramiko
+I start with the docs and found out I need to use the Transport class to make the server itself
+I then wrote code to set up a server but ran into some troubles
+I tries using ssh-keygen to generate a key but it didn't work
+I then used paramiko's function to generate an RSA key and had it save to a file in the directory, and it worked
+I then used the key to create a server but then ran into trouble trying to make an ssh terminal
+Trying to figure out how to get the server to respond to commands was a challenge but following the documents I was able to get the commands the user is sending to the server
