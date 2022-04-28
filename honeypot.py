@@ -6,6 +6,7 @@ import sys
 import paramiko
 from paramiko.py3compat import b, u, decodebytes
 import os
+from os import chdir
 import socket
 import threading
 from binascii import hexlify
@@ -13,9 +14,30 @@ from pathlib import Path
 
 attempts = 0
 running = True
+in_dir = False
 
-def ssh_command_handler(command):
-    print('default: ', command)
+def ssh_command_handler(command, channel):
+    global in_dir
+    print(Path.cwd())
+    if not in_dir:  
+        path = Path('./dir')
+        if Path.cwd() != path:
+            if not path.exists():
+                path = Path.cwd() / 'dir'
+                path.mkdir()
+            chdir(path)
+            in_dir = True
+        
+    if "ls" in command:
+        print("ls")
+    elif "echo" in command:
+        print("echo")
+    elif"cat" in command:
+        print("cat")
+    elif "cp" in command:
+        print("cp")
+    else:
+        print("Invalid command")
 
 class Server(paramiko.ServerInterface):
     def __init__(self):
@@ -94,7 +116,7 @@ def init():
                     if command == "exit":
                         run = False
                     else:
-                        print("other command")
+                        ssh_command_handler(command, chan)
 
                 chan.close()
                 t.close()
@@ -103,6 +125,7 @@ def init():
             print("\nInterrupt received, exiting...")
             sys.exit(1)
         except Exception as e:
+            print(e)
             print("user is inactive")
             sys.exit(1)
     else:   
