@@ -37,7 +37,9 @@ def ssh_command_handler(command, channel):
     elif "echo" in command:
         parts = command.split(" ")
         print(parts)
-        print("echo")
+        string = parts[1]
+        file = parts[-1]
+        print(string, file)
     elif"cat" in command:
         print("cat")
     elif "cp" in command:
@@ -114,12 +116,25 @@ def init():
                     command = ""
                     while not command.endswith("\r"):
                         transport = chan.recv(1024)
-                        command += transport.decode("utf-8")
-                        print(transport)
+                        print(command)
+                        # If client presses ctrl+c, exit
+                        if transport == b'\x03':
+                            chan.send("\n")
+                            print("Keyboard Interrupt... Exiting")
+                            sys.exit(1)
+
+                        # If client presses backspace, remove last character
                         if transport == b'\x7f':
-                            command = command[:-2]
-                            print(command)
-                        chan.send(command)
+                            if command == "":
+                                continue
+                            else:
+                                command = command[:-1]
+                                chan.send('\b \b')
+                        else:
+                            command += transport.decode("utf-8")
+                            chan.send(transport)
+                        
+                    print(command)
                     chan.send("\r\n")
                     command = command.rstrip()
                     print(command)
