@@ -1,3 +1,5 @@
+Password for each user doesn't matter, can press enter or anything
+
 To start, I had to figure out how to make an SSH server using paramiko
 I start with the docs and found out I need to use the Transport class to make the server itself
 I then wrote code to set up a server but ran into some troubles

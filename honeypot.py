@@ -38,7 +38,6 @@ def ssh_command_handler(command, channel):
             file = parts[-1]
             channel.send(file + " ")
         if contents:
-            print("not empty")
             channel.send("\r\n")
     elif "echo" in command:
         parts = command.split(" ")
@@ -105,7 +104,8 @@ class Server(paramiko.ServerInterface):
 
 def init():
     path = Path('dir')
-    shutil.rmtree(path)
+    if path.exists():
+        shutil.rmtree(path)
     
     if "-p" in sys.argv:
         try:
@@ -141,8 +141,7 @@ def init():
                     print('Timeout waiting for channel')
                     continue
                 print(username + " connected")
-
-                chan.send("Welcome to the Honeypot!\n")     
+                chan.send("Welcome " + username + "\r\n")
                 run = True
                 while run:
                     chan.send("\r")
