@@ -87,7 +87,7 @@ class Server(paramiko.ServerInterface):
     def check_auth_password(self, username, password):
         global attempts
         attempts += 1
-        if (attempts < 5):
+        if (attempts <= 5):
             print(attempts)
             return paramiko.AUTH_FAILED
         return paramiko.AUTH_SUCCESSFUL
