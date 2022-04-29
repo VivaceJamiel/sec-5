@@ -8,3 +8,12 @@ Trying to figure out how to get the server to respond to commands was a challeng
 The next task was to make file system for the server to use.
 I used pathlib to create a directory for the server to use and then created a file system for the server to use
 The directory the server uses is the 'dir' directory and it is made at the start if it doesn't exist and the server moves to it at the beginning
+When the server starts, to make sure its not persistant, the program checks if the 'dir' directory exists, if it does, delete it, and it will make it when commands are inputted
+For ls, I used pathlib and its Path objects to get the patj of the current directory of the program, which is the 'dir' created for the server
+The server would display the contents of the directory when the user types ls
+I had check each object in the path if it was a file or a directory, and then send the file to the client to display
+Echo I had to split the command to get the file and text. I split the command using " as a delimeter to get the text and a space to get a filename
+For filenames I implemented a check for .txt everytime I extract a filename for all commands
+I then used Path and put the filename in and used touch() to make the file and write the string into the file
+for cat I extracted the filename and checked it, and the used pat.read_text() and sesnt the data to the client
+for cp, I used the same process to extract files, check them and used shutil.copyfile() to copy the file to the new file

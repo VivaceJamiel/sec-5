@@ -2,6 +2,7 @@
 # HW5
 # CS 468
 
+import shutil
 import sys
 import paramiko
 from paramiko.py3compat import b, u, decodebytes
@@ -19,7 +20,6 @@ in_dir = False
 def ssh_command_handler(command, channel):
     # Checks if we are in ssh directory, if not, checks if it exists, if it doesn't, creates it and changes to it
     global in_dir
-    print(Path.cwd())
     if not in_dir:  
         path = Path('./dir')
         if Path.cwd() != path:
@@ -33,17 +33,48 @@ def ssh_command_handler(command, channel):
     if "ls" in command:
         path = Path(Path.cwd())
         contents = [x for x in path.iterdir() if x.is_dir() or x.is_file()]
-        print(contents)
+        for x in contents:
+            parts = x.parts
+            file = parts[-1]
+            channel.send(file + " ")
+        if contents:
+            print("not empty")
+            channel.send("\r\n")
     elif "echo" in command:
         parts = command.split(" ")
-        print(parts)
-        string = parts[1]
+        text = command.split("\"")
+        string = text[1]
         file = parts[-1]
-        print(string, file)
-    elif"cat" in command:
+        if '.txt' in file:
+            path = Path(file)
+            path.touch()
+            path.write_text(string)
+        else:
+            channel.send("Uknown file extension\r\n")
+    elif "cat" in command:
         print("cat")
+        parts = command.split(" ")
+        print(parts)
+        file = parts[-1]
+        if '.txt' in file:
+            path = Path(file)
+            if path.is_file():
+                text = path.read_text()
+                channel.send(text)
+                channel.send("\r\n")
+            else:
+                channel.send("File " + file + " not found\r\n")
+        else:
+            channel.send("Uknown file extension\r\n")
     elif "cp" in command:
         print("cp")
+        parts = command.split(" ")
+        source = Path(parts[-2])
+        dest = Path(parts[-1])
+        if '.txt' in parts[-2] and '.txt' in parts[-1]:
+            shutil.copyfile(source, dest)
+        else:
+            channel.send("Uknown file extension\r\n")
     else:
         print("Invalid command")
 
@@ -73,6 +104,9 @@ class Server(paramiko.ServerInterface):
         return True
 
 def init():
+    path = Path('dir')
+    shutil.rmtree(path)
+    
     if "-p" in sys.argv:
         try:
             port = sys.argv[sys.argv.index("-p") + 1]
@@ -116,7 +150,6 @@ def init():
                     command = ""
                     while not command.endswith("\r"):
                         transport = chan.recv(1024)
-                        print(command)
                         # If client presses ctrl+c, exit
                         if transport == b'\x03':
                             chan.send("\n")
@@ -134,7 +167,6 @@ def init():
                             command += transport.decode("utf-8")
                             chan.send(transport)
                         
-                    print(command)
                     chan.send("\r\n")
                     command = command.rstrip()
                     print(command)
