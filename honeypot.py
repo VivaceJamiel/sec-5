@@ -49,7 +49,7 @@ def ssh_command_handler(command, channel):
             path.touch()
             path.write_text(string)
         else:
-            channel.send("Uknown file extension\r\n")
+            channel.send("Unknown file extension\r\n")
     elif "cat" in command:
         print("cat")
         parts = command.split(" ")
@@ -110,6 +110,27 @@ def init():
     if "-p" in sys.argv:
         try:
             port = sys.argv[sys.argv.index("-p") + 1]
+
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+            sock.bind(("127.0.0.1", int(port)))
+
+            sock.listen(100)
+            client, addr = sock.accept()
+
+            t = paramiko.Transport(client)
+            if os.path.exists('./honeypot.key'):
+                t.add_server_key(paramiko.RSAKey.from_private_key_file('./honeypot.key'))        
+            else:
+                key = paramiko.RSAKey.generate(2048)
+                key.write_private_key_file('./honeypot.key')
+                t.add_server_key(key)
+            server = Server()
+            t.start_server(server=server)
+            
+            # accept the connection and set its idle timeout
+            chan = t.accept(20)
 
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
